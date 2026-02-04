@@ -1,0 +1,19 @@
+{
+        "model_type": "audio_classifier",
+        "model_name": "finetuned_voice_detector",
+        "version": "1.0.0",
+        "input_shape": [128, 128, 1],
+        "num_classes": 2,
+        "class_labels": ["fake", "real"],
+        "sample_rate": 16000,
+        "n_mels": 128,
+        "n_fft": 2048,
+        "hop_length": 512,
+        "trained_on": "",
+        "accuracy": 0.0,
+        "loss": 0.0,
+        "epochs": 0,
+        "batch_size": 32,
+        "learning_rate": 0.001,
+        "optimizer": "adam"
+}

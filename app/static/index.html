@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Voice Detector</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #1a1c2c 0%, #4a192c 100%);
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .loader {
+            border-top-color: #3498db;
+            -webkit-animation: spinner 1.5s linear infinite;
+            animation: spinner 1.5s linear infinite;
+        }
+        @keyframes spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen text-white font-sans">
+    <div class="container mx-auto px-4 py-12">
+        <header class="text-center mb-12">
+            <h1 class="text-5xl font-bold mb-4">AI Voice Detector</h1>
+            <p class="text-xl text-gray-300">Upload audio to detect if it's Human or AI-generated</p>
+        </header>
+
+        <div class="max-w-xl mx-auto glass-panel rounded-2xl p-8 shadow-2xl">
+            <!-- Upload Section -->
+            <div id="upload-section" class="text-center">
+                <div class="border-2 border-dashed border-gray-400 rounded-xl p-8 mb-6 hover:border-blue-400 transition-colors cursor-pointer relative" id="drop-zone">
+                    <input type="file" id="audio-input" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".mp3,.wav" multiple>
+                    <i class="fas fa-cloud-upload-alt text-6xl text-blue-400 mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">Drop audio file here</h3>
+                    <p class="text-gray-400 text-sm">or click to browse (MP3, WAV)</p>
+                    <p id="file-name" class="mt-4 text-green-400 font-mono hidden"></p>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-left text-sm font-bold mb-2 text-gray-300">Language</label>
+                    <select id="language-select" class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500">
+                        <option value="Tamil">Tamil</option>
+                        <option value="Hindi" selected>Hindi</option>
+                        <option value="Malayalam">Malayalam</option>
+                        <option value="Telugu">Telugu</option>
+                        <option value="English">English</option>
+                    </select>
+                </div>
+                <div class="text-xs text-yellow-300 mb-4">Max file size: 2MB · Safe mode requires API key</div>
+
+                <button onclick="analyzeAudios()" id="analyze-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                    Analyze Selected Files
+                </button>
+            </div>
+
+            <!-- Loading State -->
+            <div id="loading-state" class="hidden text-center py-8">
+                <div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-16 w-16 mx-auto mb-4"></div>
+                <p class="text-xl animate-pulse">Analyzing audio patterns...</p>
+            </div>
+
+            <!-- Result Section -->
+            <div id="result-section" class="hidden">
+                <div id="result-list" class="space-y-6"></div>
+                <div class="text-center">
+                    <button onclick="resetUI()" class="mt-8 text-blue-300 hover:text-white underline">Analyze other files</button>
+                </div>
+            </div>
+        </div>
+        
+        <footer class="text-center mt-12 text-gray-500 text-sm">
+            Powered by Hugging Face Transformers & MelodyMachine
+        </footer>
+    </div>
+
+    <script>
+        const API_KEY = "sk_test_123456789";
+        const fileInput = document.getElementById('audio-input');
+        const fileNameDisplay = document.getElementById('file-name');
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                const names = Array.from(e.target.files).map(f => f.name).join(', ');
+                fileNameDisplay.textContent = `Selected: ${names}`;
+                fileNameDisplay.classList.remove('hidden');
+            }
+        });
+
+        async function analyzeAudios() {
+            const files = Array.from(fileInput.files);
+            if (files.length === 0) {
+                alert("Please select an audio file first!");
+                return;
+            }
+            for (const f of files) {
+                if (f.size > 2 * 1024 * 1024) {
+                    alert(`File too large: ${f.name} exceeds 2MB`);
+                    return;
+                }
+            }
+
+            // UI Updates
+            document.getElementById('upload-section').classList.add('hidden');
+            document.getElementById('loading-state').classList.remove('hidden');
+
+            try {
+                const language = document.getElementById('language-select').value;
+                const results = [];
+                for (const file of files) {
+                    const base64Audio = await toBase64(file);
+                    const payload = {
+                        language: language,
+                        audioFormat: "mp3",
+                        audioBase64: base64Audio
+                    };
+                    const response = await fetch('/api/voice-detection', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-api-key': API_KEY
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    const data = await response.json();
+                    results.push({ fileName: file.name, data, ok: response.ok });
+                }
+                showResults(results, language);
+
+            } catch (error) {
+                console.error(error);
+                alert("An error occurred during analysis.");
+                resetUI();
+            }
+        }
+
+        function showResults(results, language) {
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('result-section').classList.remove('hidden');
+            const list = document.getElementById('result-list');
+            list.innerHTML = '';
+            for (const r of results) {
+                if (!r.ok) {
+                    const el = document.createElement('div');
+                    el.className = 'bg-red-900 bg-opacity-30 border border-red-500 rounded-xl p-4';
+                    el.innerHTML = `<div class="flex justify-between"><div class="font-bold">${r.fileName}</div><div class="text-sm text-gray-300">${language}</div></div><div class="text-red-400 mt-2">Error</div>`;
+                    list.appendChild(el);
+                    continue;
+                }
+                const d = r.data;
+                const isAI = d.classification === 'AI_GENERATED';
+                const color = isAI ? 'red' : 'green';
+                const icon = isAI ? 'robot' : 'user';
+                const card = document.createElement('div');
+                card.className = `border border-${color}-500 rounded-2xl p-6`;
+                const conf = (d.confidenceScore * 100).toFixed(1) + '%';
+                const jsonStr = JSON.stringify(d, null, 2);
+                card.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <div class="text-xl font-bold">${r.fileName}</div>
+                        <div class="text-sm text-gray-300">${d.language}</div>
+                    </div>
+                    <div class="flex items-center mt-3 space-x-3">
+                        <i class="fas fa-${icon} text-${color}-500 text-3xl"></i>
+                        <div class="text-2xl font-bold ${isAI ? 'text-red-500' : 'text-green-500'}">${isAI ? 'AI GENERATED' : 'HUMAN VOICE'}</div>
+                    </div>
+                    <div class="mt-2 text-4xl font-black">${conf}</div>
+                    <div class="mt-2 text-gray-300">${d.explanation}</div>
+                    <details class="mt-4 bg-black bg-opacity-30 p-3 rounded-lg">
+                        <summary class="cursor-pointer text-blue-300">View JSON</summary>
+                        <pre class="mt-2 text-xs">${jsonStr}</pre>
+                    </details>
+                `;
+                list.appendChild(card);
+            }
+        }
+
+        function resetUI() {
+            document.getElementById('result-section').classList.add('hidden');
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('upload-section').classList.remove('hidden');
+            fileInput.value = '';
+            fileNameDisplay.classList.add('hidden');
+        }
+
+        const toBase64 = file => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result.split(',')[1]);
+            reader.onerror = error => reject(error);
+        });
+    </script>
+</body>
+</html>
