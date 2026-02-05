@@ -3,370 +3,617 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Voice Detection</title>
+    <title>AI Voice Detector</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
             min-height: 100vh;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             padding: 20px;
+            color: #ffffff;
         }
-        
+
         .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            padding: 40px;
             max-width: 600px;
             width: 100%;
+            text-align: center;
         }
-        
+
         h1 {
-            color: #667eea;
-            text-align: center;
-            margin-bottom: 10px;
-            font-size: 2em;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
         }
-        
+
         .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 30px;
+            font-size: 1.1rem;
+            color: #b4b4c8;
+            margin-bottom: 50px;
+            font-weight: 400;
         }
-        
-        .upload-area {
-            border: 3px dashed #667eea;
-            border-radius: 15px;
+
+        .upload-card {
+            background: rgba(60, 60, 80, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
             padding: 40px;
-            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .upload-area {
+            border: 2px dashed rgba(138, 180, 248, 0.5);
+            border-radius: 16px;
+            padding: 60px 40px;
+            margin-bottom: 30px;
             cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            background: rgba(40, 40, 60, 0.4);
         }
-        
+
         .upload-area:hover {
-            background: #f8f9ff;
-            border-color: #764ba2;
+            border-color: #5b9eff;
+            background: rgba(50, 50, 70, 0.6);
         }
-        
+
         .upload-area.dragover {
-            background: #f0f0ff;
-            border-color: #764ba2;
+            border-color: #5b9eff;
+            background: rgba(91, 158, 255, 0.1);
+            transform: scale(1.02);
         }
-        
+
         .upload-icon {
-            font-size: 60px;
-            margin-bottom: 15px;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #5b9eff 0%, #8ab4f8 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
         }
-        
-        input[type="file"] {
+
+        .upload-icon::before {
+            content: "↑";
+            font-size: 40px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+
+        .upload-subtext {
+            font-size: 0.9rem;
+            color: #9999b3;
+        }
+
+        .file-input {
             display: none;
         }
-        
-        .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+        .selected-file {
+            background: rgba(91, 158, 255, 0.1);
+            border: 1px solid rgba(91, 158, 255, 0.3);
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            display: none;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .selected-file.show {
+            display: flex;
+        }
+
+        .file-icon {
+            font-size: 24px;
+        }
+
+        .file-info {
+            flex: 1;
+            text-align: left;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+
+        .file-size {
+            font-size: 0.85rem;
+            color: #9999b3;
+        }
+
+        .remove-file {
+            background: rgba(255, 100, 100, 0.2);
+            border: none;
+            color: #ff6464;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s;
+        }
+
+        .remove-file:hover {
+            background: rgba(255, 100, 100, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #e0e0f0;
+        }
+
+        select {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(40, 40, 60, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath fill='%23ffffff' d='M0 0l6 8 6-8z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 18px center;
+            padding-right: 45px;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #5b9eff;
+            background: rgba(50, 50, 70, 0.9);
+        }
+
+        option {
+            background: #2d2d44;
+            color: #ffffff;
+            padding: 10px;
+        }
+
+        .file-limit {
+            font-size: 0.85rem;
+            color: #f4b942;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .analyze-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #4a8fff 0%, #5b9eff 100%);
             color: white;
             border: none;
-            padding: 15px 40px;
-            border-radius: 10px;
-            font-size: 16px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
             cursor: pointer;
-            width: 100%;
-            margin-top: 20px;
-            transition: transform 0.2s;
+            transition: all 0.3s;
+            box-shadow: 0 4px 16px rgba(91, 158, 255, 0.3);
         }
-        
-        .btn:hover {
+
+        .analyze-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #3a7fef 0%, #4a8fff 100%);
             transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(91, 158, 255, 0.4);
         }
-        
-        .btn:disabled {
+
+        .analyze-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-        
-        .result {
+
+        .analyze-btn.loading {
+            position: relative;
+            color: transparent;
+        }
+
+        .analyze-btn.loading::after {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .result-container {
             margin-top: 30px;
-            padding: 25px;
-            border-radius: 15px;
             display: none;
         }
-        
-        .result.show {
+
+        .result-container.show {
             display: block;
+            animation: slideUp 0.4s ease;
         }
-        
-        .result.real {
-            background: #d4edda;
-            border: 2px solid #28a745;
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        
-        .result.fake {
-            background: #f8d7da;
-            border: 2px solid #dc3545;
+
+        .result-card {
+            background: rgba(60, 60, 80, 0.6);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
+
+        .result-card.success {
+            border-color: rgba(91, 255, 159, 0.3);
+            background: rgba(60, 80, 70, 0.4);
+        }
+
+        .result-card.error {
+            border-color: rgba(255, 100, 100, 0.3);
+            background: rgba(80, 60, 60, 0.4);
+        }
+
         .result-title {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
         }
-        
-        .result.real .result-title {
-            color: #28a745;
-        }
-        
-        .result.fake .result-title {
-            color: #dc3545;
-        }
-        
-        .confidence {
-            text-align: center;
-            font-size: 18px;
-            margin-bottom: 10px;
-        }
-        
-        .details {
-            margin-top: 15px;
-            padding: 15px;
-            background: white;
-            border-radius: 10px;
-        }
-        
-        .detail-item {
+
+        .result-item {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #eee;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
-        .detail-item:last-child {
+
+        .result-item:last-child {
             border-bottom: none;
         }
-        
-        .loading {
-            text-align: center;
-            display: none;
-            margin-top: 20px;
+
+        .result-label {
+            color: #b4b4c8;
+            font-size: 0.95rem;
         }
-        
-        .loading.show {
-            display: block;
+
+        .result-value {
+            font-weight: 600;
+            font-size: 1rem;
         }
-        
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
+
+        .result-value.fake {
+            color: #ff6464;
         }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+
+        .result-value.real {
+            color: #5bff9f;
         }
-        
-        .error {
-            background: #f8d7da;
-            color: #721c24;
+
+        .confidence-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #5b9eff 0%, #5bff9f 100%);
+            transition: width 0.6s ease;
+        }
+
+        .footer {
+            margin-top: 40px;
+            font-size: 0.9rem;
+            color: #7a7a94;
+        }
+
+        .footer a {
+            color: #8ab4f8;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: rgba(255, 100, 100, 0.1);
+            border: 1px solid rgba(255, 100, 100, 0.3);
+            border-radius: 12px;
             padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
-            display: none;
-        }
-        
-        .error.show {
-            display: block;
-        }
-        
-        .file-info {
+            color: #ff6464;
             margin-top: 15px;
-            padding: 10px;
-            background: #f8f9ff;
-            border-radius: 8px;
             display: none;
         }
-        
-        .file-info.show {
+
+        .error-message.show {
             display: block;
+        }
+
+        @media (max-width: 640px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .upload-card {
+                padding: 30px 20px;
+            }
+
+            .upload-area {
+                padding: 40px 20px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎤 AI Voice Detection</h1>
-        <p class="subtitle">Upload an audio file to detect if it's AI-generated or real</p>
-        
-        <div class="upload-area" id="uploadArea">
-            <div class="upload-icon">📁</div>
-            <h3>Click or Drag & Drop</h3>
-            <p>Support: MP3, WAV, OGG, FLAC (Max 10MB)</p>
-            <input type="file" id="fileInput" accept=".mp3,.wav,.ogg,.flac">
+        <h1>AI Voice Detector</h1>
+        <p class="subtitle">Upload audio to detect if it's Human or AI-generated</p>
+
+        <div class="upload-card">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon"></div>
+                <div class="upload-text">Drop audio file here</div>
+                <div class="upload-subtext">or click to browse (MP3, WAV)</div>
+            </div>
+
+            <input type="file" id="fileInput" class="file-input" accept=".mp3,.wav,audio/mpeg,audio/wav">
+
+            <div class="selected-file" id="selectedFile">
+                <span class="file-icon">🎵</span>
+                <div class="file-info">
+                    <div class="file-name" id="fileName"></div>
+                    <div class="file-size" id="fileSize"></div>
+                </div>
+                <button class="remove-file" id="removeFile">×</button>
+            </div>
+
+            <div class="form-group">
+                <label for="language">Language</label>
+                <select id="language" name="language">
+                    <option value="Hindi">Hindi</option>
+                    <option value="English">English</option>
+                    <option value="Tamil">Tamil</option>
+                    <option value="Malayalam">Malayalam</option>
+                    <option value="Telugu">Telugu</option>
+                </select>
+            </div>
+
+            <div class="file-limit">Max file size: 2MB - Safe mode requires API key</div>
+
+            <button class="analyze-btn" id="analyzeBtn" disabled>Analyze Selected Files</button>
+
+            <div class="error-message" id="errorMessage"></div>
         </div>
-        
-        <div class="file-info" id="fileInfo"></div>
-        
-        <button class="btn" id="analyzeBtn" disabled>Analyze Audio</button>
-        
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>Analyzing audio... This may take a few seconds.</p>
+
+        <div class="result-container" id="resultContainer">
+            <div class="result-card" id="resultCard">
+                <div class="result-title">Detection Result</div>
+                <div class="result-item">
+                    <span class="result-label">Prediction:</span>
+                    <span class="result-value" id="predictionValue"></span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Confidence:</span>
+                    <span class="result-value" id="confidenceValue"></span>
+                </div>
+                <div class="confidence-bar">
+                    <div class="confidence-fill" id="confidenceFill"></div>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Language:</span>
+                    <span class="result-value" id="languageValue"></span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">File:</span>
+                    <span class="result-value" id="fileNameValue"></span>
+                </div>
+            </div>
         </div>
-        
-        <div class="error" id="error"></div>
-        
-        <div class="result" id="result">
-            <div class="result-title" id="resultTitle"></div>
-            <div class="confidence" id="confidence"></div>
-            <div class="details" id="details"></div>
+
+        <div class="footer">
+            Powered by <a href="https://huggingface.co/transformers" target="_blank">Hugging Face Transformers</a> & MelodyMachine
         </div>
     </div>
 
     <script>
-        const API_URL = 'https://ai-voice-detection-api-production-59f2.up.railway.app';
-        
         const uploadArea = document.getElementById('uploadArea');
         const fileInput = document.getElementById('fileInput');
-        const fileInfo = document.getElementById('fileInfo');
+        const selectedFile = document.getElementById('selectedFile');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const removeFile = document.getElementById('removeFile');
         const analyzeBtn = document.getElementById('analyzeBtn');
-        const loading = document.getElementById('loading');
-        const error = document.getElementById('error');
-        const result = document.getElementById('result');
-        
-        let selectedFile = null;
-        
-        // Click to upload
-        uploadArea.addEventListener('click', () => fileInput.click());
-        
+        const languageSelect = document.getElementById('language');
+        const resultContainer = document.getElementById('resultContainer');
+        const resultCard = document.getElementById('resultCard');
+        const errorMessage = document.getElementById('errorMessage');
+
+        let currentFile = null;
+
+        // Upload area click
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
         // Drag and drop
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
             uploadArea.classList.add('dragover');
         });
-        
+
         uploadArea.addEventListener('dragleave', () => {
             uploadArea.classList.remove('dragover');
         });
-        
+
         uploadArea.addEventListener('drop', (e) => {
             e.preventDefault();
             uploadArea.classList.remove('dragover');
+            
             const files = e.dataTransfer.files;
             if (files.length > 0) {
                 handleFile(files[0]);
             }
         });
-        
+
         // File input change
         fileInput.addEventListener('change', (e) => {
             if (e.target.files.length > 0) {
                 handleFile(e.target.files[0]);
             }
         });
-        
+
+        // Handle file
         function handleFile(file) {
-            const validTypes = ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac'];
-            const maxSize = 10 * 1024 * 1024; // 10MB
-            
-            if (!validTypes.includes(file.type)) {
-                showError('Please upload a valid audio file (MP3, WAV, OGG, or FLAC)');
+            // Check file type
+            const allowedTypes = ['audio/mpeg', 'audio/wav', 'audio/mp3'];
+            if (!allowedTypes.includes(file.type) && !file.name.match(/\.(mp3|wav)$/i)) {
+                showError('Please upload an MP3 or WAV file');
                 return;
             }
-            
+
+            // Check file size (2MB = 2 * 1024 * 1024 bytes)
+            const maxSize = 2 * 1024 * 1024;
             if (file.size > maxSize) {
-                showError('File size must be less than 10MB');
+                showError('File size must be less than 2MB');
                 return;
             }
-            
-            selectedFile = file;
-            fileInfo.innerHTML = `
-                <strong>Selected:</strong> ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)
-            `;
-            fileInfo.classList.add('show');
+
+            currentFile = file;
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            selectedFile.classList.add('show');
             analyzeBtn.disabled = false;
-            error.classList.remove('show');
-            result.classList.remove('show');
+            hideError();
         }
-        
-        analyzeBtn.addEventListener('click', analyzeAudio);
-        
-        async function analyzeAudio() {
-            if (!selectedFile) return;
-            
-            loading.classList.add('show');
+
+        // Remove file
+        removeFile.addEventListener('click', (e) => {
+            e.stopPropagation();
+            currentFile = null;
+            fileInput.value = '';
+            selectedFile.classList.remove('show');
             analyzeBtn.disabled = true;
-            error.classList.remove('show');
-            result.classList.remove('show');
-            
+            resultContainer.classList.remove('show');
+        });
+
+        // Analyze button
+        analyzeBtn.addEventListener('click', async () => {
+            if (!currentFile) return;
+
+            analyzeBtn.classList.add('loading');
+            analyzeBtn.disabled = true;
+            hideError();
+            resultContainer.classList.remove('show');
+
             const formData = new FormData();
-            formData.append('file', selectedFile);
-            
+            formData.append('file', currentFile);
+            formData.append('language', languageSelect.value);
+
             try {
-                const response = await fetch(`${API_URL}/api/detect`, {
+                const response = await fetch('/detect', {
                     method: 'POST',
                     body: formData
                 });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    displayResult(result);
+                } else {
+                    showError(result.error || 'An error occurred during analysis');
                 }
-                
-                const data = await response.json();
-                displayResult(data);
-            } catch (err) {
-                showError(`Error: ${err.message}. Please try again.`);
+            } catch (error) {
+                showError('Network error: ' + error.message);
             } finally {
-                loading.classList.remove('show');
+                analyzeBtn.classList.remove('loading');
                 analyzeBtn.disabled = false;
             }
+        });
+
+        // Display result
+        function displayResult(result) {
+            const predictionValue = document.getElementById('predictionValue');
+            const confidenceValue = document.getElementById('confidenceValue');
+            const confidenceFill = document.getElementById('confidenceFill');
+            const languageValue = document.getElementById('languageValue');
+            const fileNameValue = document.getElementById('fileNameValue');
+
+            predictionValue.textContent = result.prediction.toUpperCase();
+            predictionValue.className = 'result-value ' + result.prediction;
+            
+            confidenceValue.textContent = result.confidence + '%';
+            confidenceFill.style.width = result.confidence + '%';
+            
+            languageValue.textContent = result.language;
+            fileNameValue.textContent = result.filename;
+
+            resultCard.className = 'result-card success';
+            resultContainer.classList.add('show');
         }
-        
-        function displayResult(data) {
-            const isReal = data.prediction === 'real';
-            
-            result.className = 'result show ' + (isReal ? 'real' : 'fake');
-            document.getElementById('resultTitle').textContent = 
-                isReal ? '✅ Real Voice' : '⚠️ AI-Generated Voice';
-            
-            document.getElementById('confidence').textContent = 
-                `Confidence: ${(data.confidence * 100).toFixed(1)}%`;
-            
-            document.getElementById('details').innerHTML = `
-                <div class="detail-item">
-                    <span><strong>Prediction:</strong></span>
-                    <span>${data.prediction.toUpperCase()}</span>
-                </div>
-                <div class="detail-item">
-                    <span><strong>Real Probability:</strong></span>
-                    <span>${(data.probabilities.real * 100).toFixed(2)}%</span>
-                </div>
-                <div class="detail-item">
-                    <span><strong>Fake Probability:</strong></span>
-                    <span>${(data.probabilities.fake * 100).toFixed(2)}%</span>
-                </div>
-                <div class="detail-item">
-                    <span><strong>Model:</strong></span>
-                    <span>${data.model_used}</span>
-                </div>
-            `;
-        }
-        
+
+        // Show error
         function showError(message) {
-            error.textContent = message;
-            error.classList.add('show');
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
+        }
+
+        // Hide error
+        function hideError() {
+            errorMessage.classList.remove('show');
+        }
+
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
         }
     </script>
 </body>
