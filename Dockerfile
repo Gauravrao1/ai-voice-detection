@@ -17,9 +17,6 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Copy application code
 COPY . .
 
-# Make start script executable
-RUN chmod +x start.sh
-
 # Create necessary directories with proper permissions
 RUN mkdir -p ml_model/saved_models models/huggingface_cache temp && \
     chmod -R 755 ml_model models temp
@@ -32,5 +29,9 @@ ENV PYTHONUNBUFFERED=1 \
 # Expose port
 EXPOSE 8000
 
-# Run the startup script
-CMD ["./start.sh"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:${PORT:-8000}/health || exit 1
+
+# Run with Python script
+CMD ["python", "run.py"]
