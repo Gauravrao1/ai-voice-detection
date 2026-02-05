@@ -195,29 +195,6 @@
             background: rgba(50, 50, 70, 0.9);
         }
 
-        input[type="password"],
-        input[type="text"] {
-            width: 100%;
-            padding: 14px 18px;
-            background: rgba(40, 40, 60, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            color: #ffffff;
-            font-size: 1rem;
-            transition: all 0.3s;
-        }
-
-        input[type="password"]:focus,
-        input[type="text"]:focus {
-            outline: none;
-            border-color: #5b9eff;
-            background: rgba(50, 50, 70, 0.9);
-        }
-
-        input::placeholder {
-            color: #7a7a94;
-        }
-
         option {
             background: #2d2d44;
             color: #ffffff;
@@ -446,11 +423,6 @@
                 </select>
             </div>
 
-            <div class="form-group">
-                <label for="apiKey">API Key (Required)</label>
-                <input type="password" id="apiKey" name="apiKey" placeholder="Enter your API key">
-            </div>
-
             <div class="file-limit">Max file size: 2MB - Safe mode requires API key</div>
 
             <button class="analyze-btn" id="analyzeBtn" disabled>Analyze Selected Files</button>
@@ -573,14 +545,6 @@
         analyzeBtn.addEventListener('click', async () => {
             if (!currentFile) return;
 
-            const apiKeyInput = document.getElementById('apiKey');
-            const apiKey = apiKeyInput.value.trim();
-
-            if (!apiKey) {
-                showError('Please enter your API key');
-                return;
-            }
-
             analyzeBtn.classList.add('loading');
             analyzeBtn.disabled = true;
             hideError();
@@ -601,7 +565,6 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'x-api-key': apiKey
                     },
                     body: JSON.stringify(requestBody)
                 });

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,7 +12,6 @@ from app.models.schemas import (
     VoiceDetectionResponse,
     ErrorResponse
 )
-from app.core.auth import verify_api_key
 from app.core.exceptions import AudioProcessingError
 
 # Configure logging
@@ -42,14 +41,20 @@ app.add_middleware(
 )
 
 # Mount static files
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+try:
+    app.mount("/static", StaticFiles(directory="app/static"), name="static")
+except:
+    logger.warning("Static directory not found, skipping mount")
 
 @app.get("/demo", tags=["UI"])
 async def serve_demo():
     """
     Serve the demo UI (legacy endpoint)
     """
-    return FileResponse("app/static/index.html")
+    try:
+        return FileResponse("app/static/index.html")
+    except:
+        return FileResponse("index.html")
 
 # Global detector instance
 detector = None
@@ -111,14 +116,13 @@ async def health_check():
     "/api/voice-detection",
     response_model=VoiceDetectionResponse,
     responses={
-        401: {"model": ErrorResponse, "description": "Unauthorized"},
         400: {"model": ErrorResponse, "description": "Bad Request"},
         500: {"model": ErrorResponse, "description": "Internal Server Error"}
     },
     tags=["Detection"]
 )
 async def voice_detection(
-    request: VoiceDetectionRequest  
+    request: VoiceDetectionRequest
 ):
     """
     Detect if voice is AI-generated or Human using deep learning
@@ -153,7 +157,10 @@ async def voice_detection(
     
     except AudioProcessingError as e:
         logger.error(f"Audio processing error: {str(e)}")
-        raise
+        raise HTTPException(
+            status_code=400,
+            detail=str(e)
+        )
     
     except Exception as e:
         logger.error(f"Unexpected error: {str(e)}")
