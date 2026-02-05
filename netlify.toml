@@ -1,0 +1,6 @@
+[build]
+  command = "pip install --no-cache-dir -r requirements.txt"
+  
+[build.environment]
+  PIP_NO_CACHE_DIR = "true"
+  PYTHON_VERSION = "3.11"

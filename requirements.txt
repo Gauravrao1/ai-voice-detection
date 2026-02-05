@@ -10,14 +10,13 @@ soundfile>=0.12.1
 numpy>=1.26.3,<2.0.0
 scipy>=1.11.4
 
-# Machine Learning - Traditional (Keeping for utility functions if any)
+# Machine Learning - Traditional
 scikit-learn>=1.4.0
 joblib>=1.3.2
 
-# Deep Learning & Hugging Face 🔥
-# Using >= to support Python 3.12 which requires newer torch versions
-torch>=2.2.0
-torchaudio>=2.2.0
+# Deep Learning & Hugging Face - CPU ONLY
+torch==2.2.0+cpu -f https://download.pytorch.org/whl/cpu/torch_stable.html
+torchaudio==2.2.0+cpu -f https://download.pytorch.org/whl/cpu/torch_stable.html
 transformers>=4.37.0
 datasets>=2.16.1
 accelerate>=0.26.1
