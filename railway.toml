@@ -1,4 +1,3 @@
-@"
 [build]
 builder = "dockerfile"
 dockerfilePath = "Dockerfile"
@@ -7,4 +6,3 @@ dockerfilePath = "Dockerfile"
 startCommand = "python run.py"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
-"@ | Out-File -FilePath railway.toml -Encoding UTF8
