@@ -571,6 +571,11 @@
 
                 const result = await response.json();
 
+                // Debug: Log the full response
+                console.log('API Response:', result);
+                console.log('Confidence Score:', result.confidenceScore);
+                console.log('Classification:', result.classification);
+
                 if (response.ok) {
                     displayResult(result);
                 } else {
@@ -608,13 +613,23 @@
 
             // Map classification to prediction format
             const classification = result.classification.toLowerCase();
-            const prediction = classification === 'ai-generated' ? 'fake' : 'real';
+            const prediction = classification === 'ai-generated' || classification === 'ai_generated' ? 'fake' : 'real';
             
-            predictionValue.textContent = result.classification.toUpperCase();
+            // Handle confidence score - convert to percentage if needed
+            let confidence = parseFloat(result.confidenceScore);
+            // If confidence is between 0 and 1, convert to percentage
+            if (confidence > 0 && confidence <= 1) {
+                confidence = confidence * 100;
+            }
+            confidence = Math.round(confidence * 100) / 100; // Round to 2 decimals
+            
+            // Display classification with proper formatting
+            const displayText = classification.replace(/_/g, '-').replace(/-/g, ' ').toUpperCase();
+            predictionValue.textContent = displayText;
             predictionValue.className = 'result-value ' + prediction;
             
-            confidenceValue.textContent = result.confidenceScore + '%';
-            confidenceFill.style.width = result.confidenceScore + '%';
+            confidenceValue.textContent = confidence + '%';
+            confidenceFill.style.width = confidence + '%';
             
             languageValue.textContent = result.language;
             fileNameValue.textContent = currentFile.name;
