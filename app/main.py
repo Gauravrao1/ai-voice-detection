@@ -118,8 +118,7 @@ async def health_check():
     tags=["Detection"]
 )
 async def voice_detection(
-    request: VoiceDetectionRequest,
-    api_key: str = Depends(verify_api_key)
+    request: VoiceDetectionRequest  
 ):
     """
     Detect if voice is AI-generated or Human using deep learning
