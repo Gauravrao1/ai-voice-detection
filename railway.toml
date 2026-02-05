@@ -1,0 +1,8 @@
+@"
+[build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+startCommand = "python run.py"
+"@ | Out-File -FilePath railway.toml -Encoding UTF8
