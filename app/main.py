@@ -47,7 +47,7 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 @app.get("/demo", tags=["UI"])
 async def serve_demo():
     """
-    Serve the demo UI
+    Serve the demo UI (legacy endpoint)
     """
     return FileResponse("app/static/index.html")
 
@@ -75,10 +75,17 @@ async def shutdown_event():
     """
     logger.info("Shutting down API...")
 
-@app.get("/", tags=["Health"])
+@app.get("/", tags=["UI"])
 async def root():
     """
-    Root endpoint
+    Serve the main HTML interface
+    """
+    return FileResponse("index.html")
+
+@app.get("/api/info", tags=["Health"])
+async def api_info():
+    """
+    API information endpoint
     """
     return {
         "service": "AI Voice Detection API",

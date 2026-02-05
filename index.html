@@ -550,14 +550,23 @@
             hideError();
             resultContainer.classList.remove('show');
 
-            const formData = new FormData();
-            formData.append('file', currentFile);
-            formData.append('language', languageSelect.value);
-
             try {
-                const response = await fetch('/detect', {
+                // Convert file to base64
+                const base64Audio = await fileToBase64(currentFile);
+                
+                // Prepare request body for your API
+                const requestBody = {
+                    language: languageSelect.value,
+                    audioFormat: "mp3",
+                    audioBase64: base64Audio
+                };
+
+                const response = await fetch('/api/voice-detection', {
                     method: 'POST',
-                    body: formData
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody)
                 });
 
                 const result = await response.json();
@@ -565,7 +574,7 @@
                 if (response.ok) {
                     displayResult(result);
                 } else {
-                    showError(result.error || 'An error occurred during analysis');
+                    showError(result.message || result.detail || 'An error occurred during analysis');
                 }
             } catch (error) {
                 showError('Network error: ' + error.message);
@@ -575,6 +584,20 @@
             }
         });
 
+        // Convert file to base64
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    // Remove the data URL prefix to get just the base64 string
+                    const base64 = reader.result.split(',')[1];
+                    resolve(base64);
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
         // Display result
         function displayResult(result) {
             const predictionValue = document.getElementById('predictionValue');
@@ -583,14 +606,18 @@
             const languageValue = document.getElementById('languageValue');
             const fileNameValue = document.getElementById('fileNameValue');
 
-            predictionValue.textContent = result.prediction.toUpperCase();
-            predictionValue.className = 'result-value ' + result.prediction;
+            // Map classification to prediction format
+            const classification = result.classification.toLowerCase();
+            const prediction = classification === 'ai-generated' ? 'fake' : 'real';
             
-            confidenceValue.textContent = result.confidence + '%';
-            confidenceFill.style.width = result.confidence + '%';
+            predictionValue.textContent = result.classification.toUpperCase();
+            predictionValue.className = 'result-value ' + prediction;
+            
+            confidenceValue.textContent = result.confidenceScore + '%';
+            confidenceFill.style.width = result.confidenceScore + '%';
             
             languageValue.textContent = result.language;
-            fileNameValue.textContent = result.filename;
+            fileNameValue.textContent = currentFile.name;
 
             resultCard.className = 'result-card success';
             resultContainer.classList.add('show');
