@@ -1,31 +1,29 @@
 FROM python:3.12-slim
 
-WORKDIR /app
-
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
     libsndfile1 \
     ffmpeg \
-    git \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements
+# Set working directory
+WORKDIR /app
+
+# Copy requirements first (for better caching)
 COPY requirements.txt .
 
-# Install Python dependencies
+# Install Python dependencies with CPU-only PyTorch
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application
+# Copy application code
 COPY . .
 
 # Create necessary directories
 RUN mkdir -p ml_model/saved_models models/huggingface_cache
 
-# Download base model (optional - can be done at runtime)
-# RUN python -c "from transformers import Wav2Vec2Processor, Wav2Vec2Model; Wav2Vec2Processor.from_pretrained('facebook/wav2vec2-base'); Wav2Vec2Model.from_pretrained('facebook/wav2vec2-base')"
-
 # Expose port
 EXPOSE 8000
 
-# Run application
+# Run the application
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
