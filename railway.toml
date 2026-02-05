@@ -5,4 +5,6 @@ dockerfilePath = "Dockerfile"
 
 [deploy]
 startCommand = "python run.py"
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
 "@ | Out-File -FilePath railway.toml -Encoding UTF8
