@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     MODEL_TYPE: Literal["huggingface"] = "huggingface"
     
     # Hugging Face Model Settings
-    HF_MODEL_NAME: str = "MelodyMachine/Deepfake-audio-detection"
+    HF_MODEL_NAME: str = "motheecreator/Deepfake-audio-detection"
     HF_MODEL_CACHE_DIR: str = "./models/huggingface_cache"
     USE_GPU: bool = True
     
@@ -31,8 +31,12 @@ class Settings(BaseSettings):
     WORKERS: int = 4
     
     # Audio Settings
-    MAX_AUDIO_SIZE_MB: int = 2
+    MAX_AUDIO_SIZE_MB: int = 50  # Increased from 2MB for larger files
     SAMPLE_RATE: int = 16000
+    
+    # Performance Settings
+    CHUNK_DURATION_SEC: float = 30.0  # Process audio in chunks for speed
+    USE_HALF_PRECISION: bool = True  # Use FP16 for faster GPU inference
     
     # Supported Languages
     SUPPORTED_LANGUAGES: list = ["Tamil", "English", "Hindi", "Malayalam", "Telugu"]
