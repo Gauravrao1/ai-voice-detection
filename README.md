@@ -9,7 +9,7 @@ FEATURES
 - Multi-language support (Tamil, English, Hindi, Malayalam, Telugu)
 - Hugging Face Transformers integration
 - Model: MelodyMachine/Deepfake-audio-detection
-- High accuracy (~99%)
+- High accuracy 
 - REST API with API key authentication
 - GPU acceleration support
 
